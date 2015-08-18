@@ -1,7 +1,7 @@
 /** *****************************************************************************************************
-* Author: 
+* Author: Steve Cirelli
 * File Desc: 
-* Requires: q.js
+* Requires: 
 ******************************************************************************************************* */
 if( scUtils === undefined ) { var scUtils = {}; }
 
@@ -56,6 +56,9 @@ if( scUtils === undefined ) { var scUtils = {}; }
         },
         getHeight:function(){
             return this.nHeight;
+        },
+        getParticles:function(){
+            return this.aImgDivs;
         },
 
         retrieveImageData:function(){
@@ -126,7 +129,7 @@ if( scUtils === undefined ) { var scUtils = {}; }
 
             this.aImgDivs = aImgDivs;
         },
-        
+         
         notifyInit:function(oDiv){
             for( var i=0, l=this.aListeners.length; i<l; i++ ){
                 this.aListeners[i].onInitParticle(oDiv);

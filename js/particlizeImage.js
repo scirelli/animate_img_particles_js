@@ -15,6 +15,8 @@ if( scUtils === undefined ) { var scUtils = {}; }
         this.setURL(sImgURL);
         this.setWidth(0);
         this.setHeight(0);
+        this.setCenterX(0);
+        this.setCenterY(0);
 
         this.aImgDivs = [];
         this.nImageRows = 0;//Based on particles
@@ -27,6 +29,14 @@ if( scUtils === undefined ) { var scUtils = {}; }
     ns.ParticlizeImage.prototype = {
         setURL:function( sURL ){
             this.sURL = sURL;
+            return this;
+        },
+        setCenterX:function(x){
+            this.cx = x;
+            return this;
+        },
+        setCenterY:function(y){
+            this.cy = y;
             return this;
         },
         setWidth:function(nW){
@@ -58,10 +68,17 @@ if( scUtils === undefined ) { var scUtils = {}; }
                 deferred.resolve(me);
             });
             oImg.src = this.sURL;
-            return deferred.promise;
+            return deferred.promise.then(
+                function(){
+                    me.createImageDivs();
+                },
+                function(){
+                    debugger;
+                }
+            ).done();
         },
 
-        //@public
+        //@private
         createImageDivs:function(){
             var aImgDivs = [],
                 iw       = this.getWidth(),       //Image width
@@ -74,10 +91,13 @@ if( scUtils === undefined ) { var scUtils = {}; }
                 ph       = ih/rows,               //particle height
                 pw2      = (pw*cols)/2,           //half the particle width
                 ph2      = (ph*rows)/2;           //half the particle height
+            
+            this.cx = this.cx || iw2;
+            this.cy = this.cy || 0;
 
             //"Break" the image up
             for( var col=0;  col<cols; col++ ){
-                for( var row=0,oDiv=null; row<rows; row++ ){
+                for( var row=0,oDiv=null,x=0,y=0; row<rows; row++ ){
                     oDiv = document.createElement('div');
                     x    = col*pw;
                     y    = row*ph;
@@ -86,7 +106,12 @@ if( scUtils === undefined ) { var scUtils = {}; }
                     oDiv._imageHeight              = ih;
                     oDiv._pw                       = pw;
                     oDiv._ph                       = ph;
+                    oDiv._x                        = (x-pw2)+this.cx;
+                    oDiv._y                        = (y)+this.cy;
+                    oDiv._opacity                  = 1;
                     oDiv.style.backgroundImage     = 'url(' + this.getURL() + ')';
+                    oDiv.style.left                = oDiv._x + 'px';
+                    oDiv.style.top                 = oDiv._y + 'px';
                     oDiv.style.width               = Math.ceil(pw) + 'px';
                     oDiv.style.height              = Math.ceil(ph) + 'px';
                     oDiv.style.opacity             = 1;
@@ -104,7 +129,7 @@ if( scUtils === undefined ) { var scUtils = {}; }
         
         notifyInit:function(oDiv){
             for( var i=0, l=this.aListeners.length; i<l; i++ ){
-                this.aListeners.onInitParticle(oDiv);
+                this.aListeners[i].onInitParticle(oDiv);
             }
         },
         register:function( oListener ){

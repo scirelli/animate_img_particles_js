@@ -7,55 +7,68 @@ if( scUtils === undefined ) { var scUtils = {}; }
 
 (function(ns){
 'use strict';
-    var RADIUS = 200;
-
+    var RADIUS    = 200;
+    
     function init( div ){
-        div._ix                   = div._x;
-        div._iy                   = div._y;
+        div._ix                   = div._x+((window.innerWidth/2)-div._halfImageWidth);
+        div._iy                   = div._y+((window.innerHeight/2)-div._halfImageWidth);
         div._x                    = Math.rndRange( 0, window.innerWidth );
         div._y                    = Math.rndRange( 0, window.innerHeight );
         div._radius               = RADIUS;
-        div._xRadius              = Math.rndRange(-div._radius,div._radius);
-        div._yRadius              = Math.rndRange(-div._radius,div._radius);
+        div._xRadius              = div._x - div._ix;
+        div._yRadius              = div._y - div._iy;
         div.style.top             = div._y + 'px';
         div.style.left            = div._x + 'px';
 
         div.animate               = true;
-        div.cnt                   = 2;
-        div.angle                 = 0;
         document.body.appendChild(div);
     }
 
+    function anim(){
+        var p = this.oParticleImg.getParticles(),
+            me = this;
+        
+        var angle = this.angleStep*Math.PI,
+            cos   = Math.cos(angle),
+            sin   = Math.sin(angle);
+        for( var i=0,l=p.length,div=null; i<l; i++ ){
+            div = p[i];
+
+            div._x = div._ix + cos*(div._xRadius*this.cnt);
+            div._y = div._iy + sin*(div._yRadius*this.cnt);
+            div.style.top = div._y + 'px';
+            div.style.left = div._x + 'px';
+        }
+        this.cnt   -= 0.005;
+        this.angleStep += 0.01;
+        if( this.cnt >= 0 ){
+            this.timeID = setTimeout(function(){ anim.call(me); },10);
+        }
+    }
+
     ns.RotateImage = function( sURL ){
+        if( !sURL ) throw "RotateImage requires an image url.";
         this.oParticleImg = new scUtils.ParticlizeImage(sURL);
 
-        ParticlizeImage.attachCommonStyles();
+        this.cnt       = 2;
+        this.angleStep = 0;
+        this.timeID    = 0;
+
+        scUtils.ParticlizeImage.attachCommonStyles();
         this.oParticleImg.register( this );
-        this.retrieveImageData();
     }
     ns.RotateImage.prototype = {
         onInitParticle:function( oDiv ){
             init(oDiv);
         },
-
-        anim:function(){
-            var p = this.oParticleImg.getParticles();
-
-            div.cnt   -= 0.005;
-            div.angle += 0.01;
-            var angle = div.angle*Math.PI,
-                cos   = Math.cos(angle),
-                sin   = Math.sin(angle);
-
-            div._x = div._ix + cos*(div._xRadius*div.cnt);
-            div._y = div._iy + sin*(div._yRadius*div.cnt);
-            div.style.top = (~~div._y) + 'px';
-            div.style.left = (~~div._x) + 'px';
-
-            if( div.cnt >= 0 ){
-                div.timeID = setTimeout(anim,10);
-            }
+        init:function(){
+            return this.oParticleImg.retrieveImageData();
+        },
+        start:function(){
+            var me = this;      
+            this.cnt       = 2;
+            this.angleStep = 0;
+            this.init().then( function(){ anim.call(me); } ).done();
         }
-    
     }
 })(scUtils);

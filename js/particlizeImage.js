@@ -74,11 +74,13 @@ if( scUtils === undefined ) { var scUtils = {}; }
             return deferred.promise.then(
                 function(){
                     me.createImageDivs();
+                    return true;
                 },
                 function(){
                     debugger;
+                    return false;
                 }
-            ).done();
+            );
         },
 
         //@private
@@ -107,6 +109,8 @@ if( scUtils === undefined ) { var scUtils = {}; }
 
                     oDiv._imageWidth               = iw;
                     oDiv._imageHeight              = ih;
+                    oDiv._halfImageWidth           = iw2;
+                    oDiv._halfImageHeight          = ih2;
                     oDiv._pw                       = pw;
                     oDiv._ph                       = ph;
                     oDiv._x                        = (x-pw2)+this.cx;

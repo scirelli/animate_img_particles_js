@@ -37,9 +37,20 @@ function getURLs(){
 function defaultImages(){
     var a = ['1394382527973_20percent.jpg', '20140213_083956_603-SNOW_20percent.gif', 'DSCN1928_20percent.JPG', 'DSCN1943_20percent.JPG', 'DSCN1964_20percent.JPG', 'DSCN1997_20percent.JPG', 'DSCN2029_20percent.JPG', 'DSCN2039_20percent.JPG', 'IMG_5466b_20percent.jpg', 'IMG_8546_20percent.JPG', 'img027_350x305.jpg', 'img028_20percent.jpg'];
     for( var i=0,l=a.length; i<l; i++ ){
-        a[i] = '/explode/img/dogs/small/' + a[i];
+        a[i] = '/animate_img_particles_js/img/dogs/small/' + a[i];
     }
     return a;
+}
+
+function start( a, index ){
+    if( index >= a.length ) return;
+    var oImg = new scUtils.RotateImage(a[index]);
+    oImg.start().then( function(){
+        setTimeout(function(){
+            oImg.remove();
+            start( a, index+1 );
+        }, 3000);
+    }, function(e){ console.log(e); }).done();
 }
 
 function startExplode( e ){
@@ -47,19 +58,12 @@ function startExplode( e ){
         oTmpImg   = null,
         oDiv      = null,
         aImgs     = [],
-        fw        = null,
         tmp       = getURLs();
 
     if( tmp.length ){
         a = tmp;
     }
-    for( var i=0,l=a.length,url='',oImg=null; i<l; i++ ){
-        oImg = new scUtils.FireworkPics.Image(a[i]);
-        aImgs.push(oImg);
-    }
-    fw = new scUtils.FireworkPics(null,aImgs)
-    fw.init();
-    fw.start();
+    start(a,0);
     e.preventDefault();
     return false;
 };

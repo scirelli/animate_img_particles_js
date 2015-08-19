@@ -24,7 +24,7 @@ if( scUtils === undefined ) { var scUtils = {}; }
         document.body.appendChild(div);
     }
 
-    function anim(){
+    function anim(deferred){
         var p = this.oParticleImg.getParticles(),
             me = this;
         
@@ -42,7 +42,9 @@ if( scUtils === undefined ) { var scUtils = {}; }
         this.cnt   -= 0.005;
         this.angleStep += 0.01;
         if( this.cnt >= 0 ){
-            this.timeID = setTimeout(function(){ anim.call(me); },10);
+            this.timeID = setTimeout(function(){ anim.call(me, deferred); },10);
+        }else{
+            deferred.resolve('done');
         }
     }
 
@@ -64,11 +66,17 @@ if( scUtils === undefined ) { var scUtils = {}; }
         init:function(){
             return this.oParticleImg.retrieveImageData();
         },
+        remove:function(){
+            this.oParticleImg.deleteImageDivs();
+            return this;
+        },
         start:function(){
-            var me = this;      
+            var me = this,
+                deferred = Q.defer();
             this.cnt       = 2;
             this.angleStep = 0;
-            this.init().then( function(){ anim.call(me); } ).done();
+            this.init().then( function(){ anim.call(me, deferred); } ).done();
+            return deferred.promise;
         }
     }
 })(scUtils);
